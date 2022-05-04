@@ -126,13 +126,23 @@ namespace RetainerVentures
             RemoveHooks();
         }
 
-        private static async Task PluginTask()
-        { 
-            if ((DateTime.Now - RetainerVentureSettings.Instance.LastChecked).TotalMinutes > RetainerVentureSettings.Instance.CheckTime)
+        private static async Task<bool> PluginTask()
+        {
+            if ((DateTime.Now - RetainerVentureSettings.Instance.LastChecked).TotalMinutes < RetainerVentureSettings.Instance.CheckTime) return false;
+            
+            if (!Core.Me.InCombat || Core.Me.IsAlive || !FateManager.WithinFate || !DutyManager.InInstance ||
+                WorldHelper.CurrentWorldId == WorldHelper.HomeWorldId)
             {
-                if (!Core.Me.InCombat || Core.Me.IsAlive || !FateManager.WithinFate)
-                    await LlamaLibrary.Retainers.HelperFunctions.CheckVentureTask();
+                await LlamaLibrary.Retainers.HelperFunctions.CheckVentureTask();
+                    RetainerVentureSettings.Instance.LastChecked = DateTime.Now;
+
             }
+            else
+            {
+                RetainerVentureSettings.Instance.LastChecked.AddMinutes(1);
+            }
+
+            return false;
         }
     }
 }

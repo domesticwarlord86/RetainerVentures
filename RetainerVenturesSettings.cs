@@ -12,7 +12,7 @@ namespace RetainerVentures
             private static RetainerVentureSettings _RetainerVentureSettingssettings;
             
             public static RetainerVentureSettings Instance => _RetainerVentureSettingssettings ?? (_RetainerVentureSettingssettings = new RetainerVentureSettings());
-            public RetainerVentureSettings() : base(Path.Combine(CharacterSettingsDirectory, "Lurch.json")) 
+            public RetainerVentureSettings() : base(Path.Combine(CharacterSettingsDirectory, "RetainerVentureSettings.json")) 
             {
 
             }
