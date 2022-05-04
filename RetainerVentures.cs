@@ -19,6 +19,8 @@ using System;
 using System.Collections.Generic;
 using LlamaLibrary.Helpers;
 using LlamaLibrary.Logging;
+using LlamaLibrary.Retainers;
+using ActionType = ff14bot.Enums.ActionType;
 
 
 namespace RetainerVentures
@@ -34,6 +36,7 @@ namespace RetainerVentures
 
         public override string Name { get; } = NameValue;
         private static readonly string NameValue = "Retainer Ventures";
+
 
         public override Version Version
         {
@@ -128,18 +131,38 @@ namespace RetainerVentures
 
         private static async Task<bool> PluginTask()
         {
-            if ((DateTime.Now - RetainerVentureSettings.Instance.LastChecked).TotalMinutes < RetainerVentureSettings.Instance.CheckTime) return false;
-            
-            if (!Core.Me.InCombat || Core.Me.IsAlive || !FateManager.WithinFate || !DutyManager.InInstance ||
-                WorldHelper.CurrentWorldId == WorldHelper.HomeWorldId)
-            {
-                await LlamaLibrary.Retainers.HelperFunctions.CheckVentureTask();
-                    RetainerVentureSettings.Instance.LastChecked = DateTime.Now;
 
-            }
-            else
+            var verified = await HelperFunctions.VerifiedRetainerData();
+            if (!verified)
             {
-                RetainerVentureSettings.Instance.LastChecked.AddMinutes(1);
+                return false;
+            }
+            
+            ActionManager.DoAction(13423, Core.Me.Target());
+            
+            
+            var rets = await HelperFunctions.GetOrderedRetainerArray(true);
+
+            var now = (int) DateTime.UtcNow.Subtract(new DateTime(1970, 1, 1)).TotalSeconds;
+
+            if (rets.Any(i =>
+                    i.Active && i.VentureTask != 0 && (i.VentureEndTimestamp - now) <= 0 &&
+                    SpecialCurrencyManager.GetCurrencyCount(SpecialCurrency.Venture) > 2) &&
+                (DateTime.Now - RetainerVentureSettings.LastChecked).TotalMinutes >= 0)
+            {
+                Log.Information($"Retainers completed, checking for busy.");
+                if (!Core.Me.InCombat || Core.Me.IsAlive || !FateManager.WithinFate || !DutyManager.InInstance ||
+                    WorldHelper.CurrentWorldId == WorldHelper.HomeWorldId)
+                {
+                    Log.Information($"Not busy, running venture task.");
+                    await HelperFunctions.CheckVentureTask();
+                    RetainerVentureSettings.LastChecked = DateTime.Now;
+                }
+                else
+                {
+                    Log.Information($"Too busy, waiting 5.");
+                    RetainerVentureSettings.LastChecked.AddMinutes(5);
+                }
             }
 
             return false;

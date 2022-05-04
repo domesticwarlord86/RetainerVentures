@@ -20,7 +20,7 @@ namespace RetainerVentures
             private DateTime _lastChecked = new DateTime(1970, 1, 1);
             [Description("Last time we checked for ventures.")]
             [Category("Retainers")]
-            [Browsable(false)]
+            [Browsable(true)]
             public DateTime LastChecked
             {
                 get => _lastChecked;
@@ -38,6 +38,7 @@ namespace RetainerVentures
             [Description("Time to wait in minutes between checking for ventures completed.")]
             [DefaultValue(10)]
             [Category("Retainers")]
+            [Browsable(false)]
             public int CheckTime
             {
                 get => _checkTime;
