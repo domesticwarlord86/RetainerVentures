@@ -138,9 +138,6 @@ namespace RetainerVentures
                 return false;
             }
             
-            ActionManager.DoAction(13423, Core.Me.Target());
-            
-            
             var rets = await HelperFunctions.GetOrderedRetainerArray(true);
 
             var now = (int) DateTime.UtcNow.Subtract(new DateTime(1970, 1, 1)).TotalSeconds;
