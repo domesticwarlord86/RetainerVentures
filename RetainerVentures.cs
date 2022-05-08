@@ -17,6 +17,7 @@ using System.Collections.Generic;
 using TreeSharp;
 using System;
 using System.Collections.Generic;
+using Clio.Utilities;
 using LlamaLibrary.Helpers;
 using LlamaLibrary.Logging;
 using LlamaLibrary.Retainers;
@@ -131,13 +132,16 @@ namespace RetainerVentures
 
         private static async Task<bool> PluginTask()
         {
+            
+            if (Core.Me.InCombat || !Core.Me.IsAlive || FateManager.WithinFate || DutyManager.InInstance ||
+                WorldHelper.CurrentWorldId != WorldHelper.HomeWorldId) return false;
 
             var verified = await HelperFunctions.VerifiedRetainerData();
             if (!verified)
             {
                 return false;
             }
-            
+
             var rets = await HelperFunctions.GetOrderedRetainerArray(true);
 
             var now = (int) DateTime.UtcNow.Subtract(new DateTime(1970, 1, 1)).TotalSeconds;
